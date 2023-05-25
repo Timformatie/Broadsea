@@ -9,7 +9,7 @@ volumes:
     name: rstudio-tmp-data
 
 services:
-  
+
   traefik:
     image: docker.io/library/traefik:v2.9.4@sha256:4c388f477f5b7aa48420694d90db0ecb96b4ecede60b9b7589c87858abf87b60
     container_name: traefik
@@ -51,7 +51,7 @@ services:
     profiles: [ "default", "hades" ]
     container_name: broadsea-hades
     image: ohdsi/broadsea-hades:4.2.1
-    platform: "linux/amd64"
+    platform: ${DOCKER_ARCH}
     environment:
       - USER=${HADES_USER}
       - PASSWORD=${HADES_PASSWORD}
@@ -67,33 +67,33 @@ services:
   # WebAPI and Atlas services based on the standard Docker Hub images -------------
   ohdsi-webapi-from-image:
     profiles: [ "default", "webapi-from-image" ]
-    image: docker.io/ohdsi/webapi:latest
-    extends: 
+    image: docker.io/ohdsi/webapi:2.13.0
+    extends:
       file: "ohdsi-webapi.yml"
       service: ohdsi-webapi
 
   ohdsi-atlas-from-image:
     profiles: [ "default", "atlas-from-image" ]
-    image: docker.io/ohdsi/atlas:latest
-    extends: 
+    image: docker.io/ohdsi/atlas:2.13.0
+    extends:
       file: "ohdsi-atlas.yml"
       service: ohdsi-atlas
 
   # WebAPI and Atlas services based on git repo (for developers) -------------
   ohdsi-webapi-from-git:
     profiles: [ "webapi-from-git" ]
-    build: 
+    build:
       context: ${WEBAPI_GITHUB_URL}
       args:
         MAVEN_PARAMS: "-DskipTests=true -DskipUnitTests=true"
-    extends: 
+    extends:
       file: "ohdsi-webapi.yml"
       service: ohdsi-webapi
 
   ohdsi-atlas-from-git:
     profiles: [ "atlas-from-git" ]
     build: ${ATLAS_GITHUB_URL}
-    extends: 
+    extends:
       file: "ohdsi-atlas.yml"
       service: ohdsi-atlas
 
@@ -103,7 +103,7 @@ services:
     profiles: [ "default", "atlasdb" ]
     image: ohdsi/broadsea-atlasdb:2.0.0
     container_name: broadsea-atlasdb
-    platform: "linux/amd64"
+    platform: ${DOCKER_ARCH}
     cpus: 2
     mem_limit: "2G"
     environment:
@@ -124,8 +124,8 @@ services:
     container_name: solr-vocab
     restart: unless-stopped
     image: solr:8.11.1
-    environment: 
-      SOLR_OPTS: 
+    environment:
+      SOLR_OPTS:
         -DVOCAB_VERSION=${VOCAB_VERSION}
         -DVOCAB_JDBC_DRIVER_PATH=${VOCAB_JDBC_DRIVER_PATH}
         -DVOCAB_JDBC_URL=${VOCAB_JDBC_URL}
@@ -155,7 +155,7 @@ services:
     depends_on:
       broadsea-solr-vocab:
         condition: service_healthy
-    command: curl -d "vocab_database_schema=${VOCAB_DATABASE_SCHEMA}" \ 
+    command: curl -d "vocab_database_schema=${VOCAB_DATABASE_SCHEMA}" \
              -X POST ${SOLR_VOCAB_ENDPOINT}/${VOCAB_VERSION}/dataimport?command=full-import&entity=concept
 
   broadsea-ares:
@@ -203,4 +203,3 @@ services:
     volumes:
       - ./phoebe:/tmp
     entrypoint: ["sh", "/tmp/load_phoebe.sh" ]
-    
