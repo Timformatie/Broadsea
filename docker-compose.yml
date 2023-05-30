@@ -58,6 +58,8 @@ services:
     volumes:
       - rstudio-home-data:/home
       - rstudio-tmp-data:/tmp
+      - ./bigquery:/tmp/drivers/:ro
+      - ./${SERVICE_ACCOUNT_KEY}:/tmp/google/${SERVICE_ACCOUNT_KEY}
     labels:
       - "traefik.enable=true"
     ports:

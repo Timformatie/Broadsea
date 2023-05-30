@@ -13,8 +13,11 @@ services:
     privileged: false
     volumes:
       - ./cacerts:/usr/local/openjdk-8/lib/security/cacerts:ro # add a cacerts file if using LDAPS
+      - ./bigquery:/tmp/drivers/:ro
+      - ./${SERVICE_ACCOUNT_KEY}:/var/lib/ohdsi/webapi/${SERVICE_ACCOUNT_KEY}
     environment:
 
+      CLASSPATH: ":/tmp/drivers/*.jar"
       DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
       DATASOURCE_URL: ${WEBAPI_DATASOURCE_URL}
       DATASOURCE_USERNAME: ${WEBAPI_DATASOURCE_USERNAME}
@@ -39,7 +42,7 @@ services:
       SOLR_VOCAB_ENDPOINT: "${SOLR_VOCAB_ENDPOINT}"
 
       # Security provider enabling/disabling
-      
+
       SECURITY_PROVIDER: ${WEBAPI_SECURITY_PROVIDER}
       SECURITY_AUTH_KERBEROS_ENABLED: ${SECURITY_AUTH_KERBEROS_ENABLED}
       SECURITY_AUTH_OPENID_ENABLED: ${SECURITY_AUTH_OPENID_ENABLED}
@@ -113,9 +116,9 @@ services:
       SECURITY_GOOGLEIAP_CLOUDPROJECTID: ${SECURITY_GOOGLEIAP_CLOUDPROJECTID}
       SECURITY_GOOGLEIAP_BACKENDSERVICEID: ${SECURITY_GOOGLEIAP_BACKENDSERVICEID}
       SECURITY_GOOGLE_ACCESSTOKEN_ENABLED: ${SECURITY_GOOGLE_ACCESSTOKEN_ENABLED}
-      
+
       # Security env variables - CAS
-      
+
       SECURITY_CAS_LOGINURL: ${HTTP_TYPE}://${WEBAPI_SECURITY_CAS_SERVER}/idp/profile/cas/login
       SECURITY_CAS_CALLBACKURL: ${HTTP_TYPE}://${BROADSEA_HOST}/WebAPI/user/cas/callback?client_name=CasClient
       SECURITY_CAS_SERVERURL: ${HTTP_TYPE}://${WEBAPI_SECURITY_CAS_SERVER}/idp/profile/cas
