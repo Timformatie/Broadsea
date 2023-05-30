@@ -69,7 +69,7 @@ services:
   # WebAPI and Atlas services based on the standard Docker Hub images -------------
   ohdsi-webapi-from-image:
     profiles: [ "default", "webapi-from-image" ]
-    image: docker.io/ohdsi/webapi:2.13.0
+    image: broadsea-webapi-bigquery
     extends:
       file: "ohdsi-webapi.yml"
       service: ohdsi-webapi
