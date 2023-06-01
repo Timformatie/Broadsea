@@ -23,7 +23,7 @@ services:
     labels:
       - "traefik.enable=true"
     ports:
-      - "${BROADSEA_HOST}:80:80"
+      - "80:80"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
@@ -47,6 +47,8 @@ services:
     volumes:
       - rstudio-home-data:/home
       - rstudio-tmp-data:/tmp
+      - ./bigquery:/tmp/drivers/:ro
+      - ./${SERVICE_ACCOUNT_KEY}:/tmp/google/${SERVICE_ACCOUNT_KEY}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.broadsea-hades.rule=Host(`${BROADSEA_HOST}`) && PathPrefix(`/`)"
@@ -58,12 +60,12 @@ services:
 
   ohdsi-atlas:
     container_name: ohdsi-atlas
-    image: docker.io/ohdsi/atlas:latest
+    image: docker.io/ohdsi/atlas:2.12.1
     restart: unless-stopped
     ipc: none
     privileged: false
     environment:
-      WEBAPI_URL: "http://${BROADSEA_HOST}/WebAPI/"
+      WEBAPI_URL: "http://${BROADSEA_HOST}:8001/WebAPI/"
     depends_on:
       - ohdsi-webapi
     labels:
@@ -73,7 +75,7 @@ services:
 
   ohdsi-webapi:
     container_name: ohdsi-webapi
-    image: docker.io/ohdsi/webapi:latest
+    image: broadsea-webapi-bigquery
     restart: unless-stopped
     ipc: none
     read_only: true
@@ -102,12 +104,16 @@ services:
       FLYWAY_BASELINEDESCRIPTION: Base Migration
       SECURITY_CORS_ENABLED: "true"
       SECURITY_ORIGIN: "http://${BROADSEA_HOST}"
+      CLASSPATH: ":/tmp/drivers/*.jar"
     depends_on:
       - broadsea-atlasdb
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.ohdsi-webapi.rule=Host(`${BROADSEA_HOST}`) && PathPrefix(`/WebAPI`)"
       - "traefik.http.routers.ohdsi-webapi.entrypoints=web"
+    volumes:
+      - ./bigquery:/tmp/drivers/:ro
+      - ./${SERVICE_ACCOUNT_KEY}:/var/lib/ohdsi/webapi/${SERVICE_ACCOUNT_KEY}
 
   broadsea-atlasdb:
     image: ohdsi/broadsea-atlasdb:2.0.0
