@@ -17,7 +17,6 @@ services:
       - ./${SERVICE_ACCOUNT_KEY}:/var/lib/ohdsi/webapi/${SERVICE_ACCOUNT_KEY}
     environment:
 
-      CLASSPATH: ":/tmp/drivers/*.jar"
       DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
       DATASOURCE_URL: ${WEBAPI_DATASOURCE_URL}
       DATASOURCE_USERNAME: ${WEBAPI_DATASOURCE_USERNAME}
